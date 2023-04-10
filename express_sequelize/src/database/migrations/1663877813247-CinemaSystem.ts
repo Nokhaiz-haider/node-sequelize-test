@@ -1,4 +1,4 @@
-import { QueryInterface } from 'sequelize';
+import { DECIMAL, QueryInterface } from 'sequelize';
 
 export default {
   /**
@@ -31,10 +31,140 @@ export default {
    * As a cinema owner I don't want to configure the seating for every show
    */
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  up: (queryInterface: QueryInterface): Promise<void> => {
-    throw new Error('TODO: implement migration in task 4');
+  up: async (queryInterface: QueryInterface): Promise<void> => {
+    // Create Movies table
+    await queryInterface.createTable('Movies', {
+      id: {
+        type: "integer",
+        primaryKey: true,
+        autoIncrement: true,
+        allowNull: false,
+      },
+      title: {
+        type: "varchar",
+        allowNull: false,
+      },
+      duration: {
+        type: "integer",
+        allowNull: false,
+      },
+      rating: {
+        type: "varchar",
+        allowNull: false,
+      },
+    });
+  
+    // Create Showrooms table
+    await queryInterface.createTable('Showrooms', {
+      id: {
+        type: "integer",
+        primaryKey: true,
+        autoIncrement: true,
+        allowNull: false,
+      },
+      name: {
+        type: "varchar",
+        allowNull: false,
+      },
+    });
+  
+    // Create Shows table
+    await queryInterface.createTable('Shows', {
+      id: {
+        type: "integer",
+        primaryKey: true,
+        autoIncrement: true,
+        allowNull: false,
+      },
+      movie_id: {
+        type: "integer",
+        allowNull: false,
+        references: {
+          model: 'Movies',
+          key: 'id',
+        },
+      },
+      showroom_id: {
+        type: "integer",
+        allowNull: false,
+        references: {
+          model: 'Showrooms',
+          key: 'id',
+        },
+      },
+      start_time: {
+        type: "timestamp",
+        allowNull: false,
+      },
+      end_time: {
+        type: "timestamp",
+        allowNull: false,
+      },
+      is_booked_out: {
+        type: "boolean",
+        defaultValue: false,
+        allowNull: false,
+      },
+    });
+  
+    // Create Seats table
+    await queryInterface.createTable('Seats', {
+      id: {
+        type: "integer",
+        primaryKey: true,
+        autoIncrement: true,
+        allowNull: false,
+      },
+      showroom_id: {
+        type: "integer",
+        allowNull: false,
+        references: {
+          model: 'Showrooms',
+          key: 'id',
+        },
+      },
+      seat_number: {
+        type: "varchar",
+        allowNull: false,
+      },
+      seat_type: {
+        type: "varchar",
+        allowNull: false,
+      },
+      is_booked: {
+        type: "boolean",
+        defaultValue: false,
+        allowNull: false,
+      },
+    });
+  
+    // Create Pricing table
+    await queryInterface.createTable('Pricing', {
+      id: {
+        type: "integer",
+        primaryKey: true,
+        autoIncrement: true,
+        allowNull: false,
+      },
+      show_id: {
+        type: "integer",
+        allowNull: false,
+        references: {
+          model: 'Shows',
+          key: 'id',
+        },
+      },
+      price: {
+        type: DECIMAL(10, 2),
+        allowNull: false,
+      },
+      premium_percentage: {
+        type: DECIMAL(10, 2),
+        allowNull: true,
+      },
+    });
   },
-
+  
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   down: (queryInterface: QueryInterface) => {
     // do nothing

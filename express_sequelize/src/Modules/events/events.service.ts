@@ -1,5 +1,7 @@
 import Event from './entities/event.entity';
-
+import Workshop from './entities/workshop.entity';
+import { Op } from 'sequelize';
+import sequelize from 'sequelize';
 
 export class EventsService {
 
@@ -84,9 +86,15 @@ export class EventsService {
     ```
      */
 
-  async getEventsWithWorkshops() {
-    throw new Error('TODO task 1');
-  }
+    async getEventsWithWorkshops(): Promise<Event[]> {
+      const events = await Event.findAll({
+        include: [{
+          model: Workshop,
+          as: 'workshops'
+        }]
+      });
+      return events;
+    }
 
   /* TODO: complete getFutureEventWithWorkshops so that it returns events with workshops, that have not yet started
     Requirements:
@@ -154,7 +162,35 @@ export class EventsService {
     ]
     ```
      */
-  async getFutureEventWithWorkshops() {
-    throw new Error('TODO task 2');
-  }
+    async getFutureEventWithWorkshops() {
+      const eventsWithWorkshops = await Event.findAll({
+        attributes: {
+          include: [[sequelize.fn('MIN', sequelize.col('workshops.start')), 'firstWorkshopStart']],
+        },
+        include: [{
+          model: Workshop,
+          attributes: [],
+        }],
+        where: {
+          '$workshops.start$': {
+            [Op.gt]: new Date(),
+          },
+        },
+        group: ['Event.id'],
+        having: {
+          firstWorkshopStart: {
+            [Op.not]: null,
+          },
+        },
+      });
+      
+      // map the result to the desired format
+      return eventsWithWorkshops.map(event => ({
+        id: event.id,
+        name: event.name,
+        createdAt: event.createdAt,
+        workshops: event.get('workshops'),
+      }));
+    }
+    
 }

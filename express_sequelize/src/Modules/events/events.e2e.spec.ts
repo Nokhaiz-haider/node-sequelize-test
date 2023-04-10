@@ -30,7 +30,7 @@ describe('events', () => {
     const response = await request(Server.getApp().app)
       .get('/events/events')
       .expect(200);
-
+    
     const result = response.body;
 
     expect(result.length).toBe(3);
@@ -40,10 +40,10 @@ describe('events', () => {
     );
     expect(result[1].name).toBe('Laravel convention ' + date2);
     expect(result[1].workshops[0].name).toBe(
-      'The new Eloquent - load more with less',
+      'AutoEx - handles exceptions 100% automatic',
     );
     expect(result[1].workshops[1].name).toBe(
-      'AutoEx - handles exceptions 100% automatic',
+      'The new Eloquent - load more with less',
     );
     expect(result[2].name).toBe('React convention ' + date2);
     expect(result[2].workshops[0].name).toBe(
